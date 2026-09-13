@@ -1,0 +1,150 @@
+.ca-admin .admin-preview-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem var(--ca-gutter);
+  background: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+.ca-admin .admin-preview-bar > :first-child {
+  flex: 1;
+  min-width: 12rem;
+}
+.ca-admin .admin-theme label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.ca-admin .admin-theme button {
+  min-width: 5rem;
+}
+.ca-admin .admin-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--ca-grid-gap);
+}
+.ca-admin .admin-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--ca-grid-gap);
+  align-items: start;
+}
+.ca-admin .admin-form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+}
+.ca-admin .admin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+.ca-admin .admin-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.ca-admin .admin-filter > :first-child {
+  flex: 1;
+  min-width: 12rem;
+}
+.ca-admin .admin-table-wrap {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.ca-admin .admin-table-wrap table {
+  min-width: 40rem;
+}
+.ca-admin[data-density="comfortable"]
+  .admin-table-wrap
+  [data-slot="table-cell"] {
+  padding-block: 1.5rem;
+}
+.ca-admin .admin-identity {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  min-width: 0;
+}
+.ca-admin .admin-avatar {
+  width: var(--profile-portrait-size);
+  height: var(--profile-portrait-size);
+  aspect-ratio: 1;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius);
+  background: var(--muted);
+  object-fit: cover;
+  object-position: center 32%;
+  outline: 1px solid oklch(0 0 0 / 10%);
+  outline-offset: -1px;
+}
+.dark .ca-admin .admin-avatar { outline-color: oklch(1 0 0 / 10%); }
+.ca-admin .admin-number {
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.ca-admin .admin-note {
+  border-inline-start: 2px solid var(--border);
+  padding-inline-start: 1rem;
+  color: var(--muted-foreground);
+}
+.ca-admin .admin-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.ca-admin .admin-field input,
+.ca-admin .admin-field textarea,
+.ca-admin .admin-field button {
+  min-height: 2.75rem;
+}
+.ca-admin .admin-save {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding-block: 1rem;
+}
+.ca-admin .admin-save button {
+  min-height: 2.75rem;
+}
+.ca-admin .admin-mobile-records {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.ca-admin .admin-desktop-records {
+  display: none;
+}
+@media (max-width: 767px) {
+  .ca-admin [data-slot="button"] {
+    min-height: 2.75rem;
+  }
+}
+@container ca-page (min-width:40rem) {
+  .ca-admin .admin-form-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ca-admin .admin-desktop-records {
+    display: block;
+  }
+  .ca-admin .admin-mobile-records {
+    display: none;
+  }
+}
+@container ca-page (min-width:60rem) {
+  .ca-admin .admin-stats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .ca-admin .admin-split {
+    grid-template-columns: minmax(0, 2fr) minmax(16rem, 1fr);
+  }
+}

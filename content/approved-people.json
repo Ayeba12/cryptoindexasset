@@ -1,0 +1,21 @@
+{
+  "traders": [
+    { "slug": "daniel-freeman", "name": "Daniel Freeman", "avatar": "/images/traders/daniel-freeman.jpg", "avatarAlt": "Portrait of Daniel Freeman", "strategy": "Swing Trading", "assets": "BTC / LTC", "copiers": 986, "accuracy": 72.1, "rating": 4.7 },
+    { "slug": "elena-rostova", "name": "Elena Rostova", "avatar": "/images/traders/elena-rostova.jpg", "avatarAlt": "Portrait of Elena Rostova", "strategy": "Scalping & Momentum", "assets": "ETH / USDT", "copiers": 1420, "accuracy": 78.4, "rating": 4.9 },
+    { "slug": "marcus-vance", "name": "Marcus Vance", "avatar": "/images/traders/marcus-vance.jpg", "avatarAlt": "Portrait of Marcus Vance", "strategy": "Breakout Trading", "assets": "SOL / BTC", "copiers": 843, "accuracy": 69.8, "rating": 4.6 },
+    { "slug": "sofia-al-mansoor", "name": "Sofia Al-Mansoor", "avatar": "/images/traders/sofia-al-mansoor.jpg", "avatarAlt": "Portrait of Sofia Al-Mansoor", "strategy": "Trend Following", "assets": "BTC / USDT", "copiers": 1895, "accuracy": 81.2, "rating": 4.9 },
+    { "slug": "chen-wei", "name": "Chen Wei", "avatar": "/images/traders/chen-wei.jpg", "avatarAlt": "Portrait of Chen Wei", "strategy": "Arbitrage & Mean Reversion", "assets": "ETH / BTC", "copiers": 612, "accuracy": 74.5, "rating": 4.5 },
+    { "slug": "mateo-morales", "name": "Mateo Morales", "avatar": "/images/traders/mateo-morales.png", "avatarAlt": "Portrait of Mateo Morales", "strategy": "Position Trading", "assets": "XRP / USDT", "copiers": 734, "accuracy": 68.3, "rating": 4.4 }
+  ],
+  "testimonials": [
+    { "slug": "liam-thorne", "name": "Liam Thorne", "avatar": "/images/testimonials/liam-thorne.jpg", "topic": "Informed trader selection", "quote": "Being able to compare accuracy metrics and strategy types side-by-side made selecting my first trader straightforward and stress-free." },
+    { "slug": "amara-eze", "name": "Amara Eze", "avatar": "/images/testimonials/amara-eze.jpg", "topic": "Seamless account funding", "quote": "The wallet QR code made funding my USDT balance effortless. The confirmation appeared on my dashboard without any guesswork." },
+    { "slug": "julian-mercer", "name": "Julian Mercer", "avatar": "/images/testimonials/julian-mercer.jpg", "topic": "Clear allocation breakdown", "quote": "I appreciate seeing my allocations separated by trader. It makes tracking which strategy performs best completely transparent." },
+    { "slug": "priya-patel", "name": "Priya Patel", "avatar": "/images/testimonials/priya-patel.jpg", "topic": "Transparent withdrawals", "quote": "Submitting a withdrawal request is direct and transparent. I can follow the status from pending to completed right inside my activity log." },
+    { "slug": "david-lindqvist", "name": "David Lindqvist", "avatar": "/images/testimonials/david-lindqvist.jpg", "topic": "Hands-off market participation", "quote": "As someone without hours to analyze chart patterns, copy trading lets me participate in market moves while letting experienced traders handle execution." },
+    { "slug": "claire-moreau", "name": "Claire Moreau", "avatar": "/images/testimonials/claire-moreau.jpg", "topic": "Focused portfolio overview", "quote": "The dashboard does not overwhelm you with clutter. My BTC, ETH, and total portfolio valuation are front and center the moment I log in." },
+    { "slug": "tariq-al-fassi", "name": "Tariq Al-Fassi", "avatar": "/images/testimonials/tariq-al-fassi.jpg", "topic": "Hassle-free verification", "quote": "The identity verification process was smooth. The step-by-step guidance kept me informed of my account approval status at every stage." },
+    { "slug": "hannah-becker", "name": "Hannah Becker", "avatar": "/images/testimonials/hannah-becker.jpg", "topic": "Timely trading updates", "quote": "Real-time notifications keep me updated whenever a trader I follow opens or closes a position. I never feel out of the loop." },
+    { "slug": "carlos-mendez", "name": "Carlos Mendez", "avatar": "/images/testimonials/carlos-mendez.jpg", "topic": "Balanced risk management", "quote": "The risk ratings and historical accuracy stats gave me the confidence to diversify my capital across three different trading strategies." }
+  ]
+}

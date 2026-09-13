@@ -1,0 +1,189 @@
+[
+  {
+    "page_ref": "/about",
+    "file": "pages/about.md",
+    "content_version": "1.0",
+    "content_sha256": "911de52fd0262cf403ea76175c372e62aa14f8ff633dd174ad98251dd5c7d535",
+    "change_ref": "public-portal-copy-2026-09-02-v1",
+    "narrative_canon_id": null,
+    "narrative_canon_version": null,
+    "claims_projection_offset": null,
+    "dependency_status": "approved-fallback"
+  },
+  {
+    "page_ref": "/contact",
+    "file": "pages/contact.md",
+    "content_version": "1.0",
+    "content_sha256": "f9b59cdea59ca2770f8735532273f52f8f09ccaf96d08f18208b81ae74bdfc5e",
+    "change_ref": "public-portal-copy-2026-09-02-v1",
+    "narrative_canon_id": null,
+    "narrative_canon_version": null,
+    "claims_projection_offset": null,
+    "dependency_status": "approved-fallback"
+  },
+  {
+    "page_ref": "/copy-trading",
+    "file": "pages/copy-trading.md",
+    "content_version": "1.0",
+    "content_sha256": "49f2f46c26b3ca977e459d71a7b994b5a0c307f7aca96c40ca708943dfa4a268",
+    "change_ref": "public-portal-copy-2026-09-02-v1",
+    "narrative_canon_id": null,
+    "narrative_canon_version": null,
+    "claims_projection_offset": null,
+    "dependency_status": "approved-fallback"
+  },
+  {
+    "page_ref": "/faq",
+    "file": "pages/faq.md",
+    "content_version": "1.0",
+    "content_sha256": "e8da71820af6c424d73f93086051c10f1094a63cb70eedbbf65b39bf5ea583aa",
+    "change_ref": "public-portal-copy-2026-09-02-v1",
+    "narrative_canon_id": null,
+    "narrative_canon_version": null,
+    "claims_projection_offset": null,
+    "dependency_status": "approved-fallback"
+  },
+  {
+    "page_ref": "/fees",
+    "file": "pages/fees.md",
+    "content_version": "1.0",
+    "content_sha256": "c069d7720a0cc8eb7ecb0aa3e7dba7ee7437d96a2f1930481b3eb8fa38a4d603",
+    "change_ref": "public-portal-copy-2026-09-02-v1",
+    "narrative_canon_id": null,
+    "narrative_canon_version": null,
+    "claims_projection_offset": null,
+    "dependency_status": "approved-fallback"
+  },
+  {
+    "page_ref": "/forgot-password",
+    "file": "pages/forgot-password.md",
+    "content_version": "1.0",
+    "content_sha256": "b292b67136eb8a8d67f39efb2dd547e9ff0257297aa267163adfe44e979b3ddf",
+    "change_ref": "public-portal-copy-2026-09-02-v1",
+    "narrative_canon_id": null,
+    "narrative_canon_version": null,
+    "claims_projection_offset": null,
+    "dependency_status": "approved-fallback"
+  },
+  {
+    "page_ref": "/",
+    "file": "pages/home.md",
+    "content_version": "1.1",
+    "content_sha256": "352c3bad10763490c2bd9cfb2d98216bfe6e8cd22543d4a39be64074ada78abf",
+    "change_ref": "public-portal-visual-direction-2026-09-02-v1.1",
+    "narrative_canon_id": null,
+    "narrative_canon_version": null,
+    "claims_projection_offset": null,
+    "dependency_status": "approved-fallback"
+  },
+  {
+    "page_ref": "/how-it-works",
+    "file": "pages/how-it-works.md",
+    "content_version": "1.0",
+    "content_sha256": "ba52c0f7e8b4c309879603221ec08eba8a64669b41ccb97f28bf9850991a6c3d",
+    "change_ref": "public-portal-copy-2026-09-02-v1",
+    "narrative_canon_id": null,
+    "narrative_canon_version": null,
+    "claims_projection_offset": null,
+    "dependency_status": "approved-fallback"
+  },
+  {
+    "page_ref": "/investors",
+    "file": "pages/investors.md",
+    "content_version": "1.0",
+    "content_sha256": "d05f76a89b6cc8577fcae6e701680d9084d2b9b94cb01e16271b688a13712806",
+    "change_ref": "public-portal-copy-2026-09-02-v1",
+    "narrative_canon_id": null,
+    "narrative_canon_version": null,
+    "claims_projection_offset": null,
+    "dependency_status": "approved-fallback"
+  },
+  {
+    "page_ref": "/login",
+    "file": "pages/login.md",
+    "content_version": "1.0",
+    "content_sha256": "7f9666fb23c983654d42499b688b12068209f2efe8af94a8255ae838903f9632",
+    "change_ref": "public-portal-copy-2026-09-02-v1",
+    "narrative_canon_id": null,
+    "narrative_canon_version": null,
+    "claims_projection_offset": null,
+    "dependency_status": "approved-fallback"
+  },
+  {
+    "page_ref": "HTTP 404",
+    "file": "pages/not-found.md",
+    "content_version": "1.0",
+    "content_sha256": "03ee77d83d19d9a238d4859bb5611cba9b734e645e3745d58defbe878f28fc5a",
+    "change_ref": "public-portal-copy-2026-09-02-v1",
+    "narrative_canon_id": null,
+    "narrative_canon_version": null,
+    "claims_projection_offset": null,
+    "dependency_status": "approved-fallback"
+  },
+  {
+    "page_ref": "/policy",
+    "file": "pages/privacy.md",
+    "content_version": "1.0",
+    "content_sha256": "9d02640ce90eba22d3c32b2944dae83248e7a0818b1cdd048edbde953e45d08a",
+    "change_ref": "public-portal-copy-2026-09-02-v1",
+    "narrative_canon_id": null,
+    "narrative_canon_version": null,
+    "claims_projection_offset": null,
+    "dependency_status": "approved-fallback"
+  },
+  {
+    "page_ref": "/register",
+    "file": "pages/register.md",
+    "content_version": "1.0",
+    "content_sha256": "2779411d575086b6702ec1b0e7feab27a597ca3d2970c86d1a6c4ec5d4958efa",
+    "change_ref": "public-portal-copy-2026-09-02-v1",
+    "narrative_canon_id": null,
+    "narrative_canon_version": null,
+    "claims_projection_offset": null,
+    "dependency_status": "approved-fallback"
+  },
+  {
+    "page_ref": "/reset-password",
+    "file": "pages/reset-password.md",
+    "content_version": "1.0",
+    "content_sha256": "3d1f2c1622389fc455ef1d3957ddfab9a391d431b34920e65f0234d064ce0071",
+    "change_ref": "public-portal-copy-2026-09-02-v1",
+    "narrative_canon_id": null,
+    "narrative_canon_version": null,
+    "claims_projection_offset": null,
+    "dependency_status": "approved-fallback"
+  },
+  {
+    "page_ref": "/risk-disclosure",
+    "file": "pages/risk-disclosure.md",
+    "content_version": "1.0",
+    "content_sha256": "b9dc103282bf81be7d781c3408a69d8bee0b3db2c954df56398c4af239e4b98b",
+    "change_ref": "public-portal-copy-2026-09-02-v1",
+    "narrative_canon_id": null,
+    "narrative_canon_version": null,
+    "claims_projection_offset": null,
+    "dependency_status": "approved-fallback"
+  },
+  {
+    "page_ref": "/security",
+    "file": "pages/security.md",
+    "content_version": "1.0",
+    "content_sha256": "85b293226329bb2ff6d4dacce7246f026f520859b63b66fc153d7bc96aaa7017",
+    "change_ref": "public-portal-copy-2026-09-02-v1",
+    "narrative_canon_id": null,
+    "narrative_canon_version": null,
+    "claims_projection_offset": null,
+    "dependency_status": "approved-fallback"
+  },
+  {
+    "page_ref": "/terms",
+    "file": "pages/terms.md",
+    "content_version": "1.0",
+    "content_sha256": "3e39be293dfad21c30c32b136e113e475dd63cd0d44676b4afeb728d39df9155",
+    "change_ref": "public-portal-copy-2026-09-02-v1",
+    "narrative_canon_id": null,
+    "narrative_canon_version": null,
+    "claims_projection_offset": null,
+    "dependency_status": "approved-fallback"
+  }
+]

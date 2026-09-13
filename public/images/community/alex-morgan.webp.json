@@ -1,0 +1,9 @@
+{
+  "generationMode": "built-in image_gen",
+  "fictional": true,
+  "disclosure": "AI-generated fictional demonstration persona. Not a real customer, trader, or endorsement.",
+  "original": "output/community-portraits/alex-morgan.png",
+  "dimensions": { "width": 256, "height": 256 },
+  "prompt": "Use case: photorealistic-natural\nAsset type: square avatar portrait for a clearly labelled fictional demonstration persona on a website, not a real customer or trader endorsement.\nScene/backdrop: plain soft grey studio background.\nSubject: A fictional man approximately 32 years old with fair skin, brown hair and light stubble, wearing a dark knit top. A distinct invented person, not resembling a known person.\nStyle/medium: photorealistic editorial head-and-shoulders photograph with natural skin pores, small facial lines and honest fabric texture; no glamour retouching.\nComposition/framing: one person only, centred, looking at the camera, head and both shoulders visible with generous clear space above the hair for a circular avatar crop; square 1:1 image.\nLighting/mood: soft side daylight, gentle natural shadows, relaxed expression, approachable slight smile.\nConstraints: preserve natural human anatomy and realistic eyes, maintain neutral restrained colours; no props, no additional people, no logos, no text, no watermarks, no frames, no beauty filters.",
+  "createdAt": "2026-09-04T16:58:24.284Z"
+}

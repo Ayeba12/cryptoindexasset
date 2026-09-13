@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Testing & Coverage
+/coverage
+
+# Next.js build output
+/.next/
+/out/
+/.next-public-check/
+
+# Production builds
+/build
+/dist
+
+# Environment variables & secrets
+.env*
+!.env.example
+
+# Build caches & temp artifacts
+*.tsbuildinfo
+output/
+.impeccable/
+software-architecture-skills/
+
+# System & IDE files
+.DS_Store
+*.pem
+Thumbs.db
+.vscode/
+.idea/
+
+# Antigravity IDE system generated files
+.system_generated/

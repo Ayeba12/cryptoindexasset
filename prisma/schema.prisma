@@ -1,0 +1,269 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPERADMIN
+}
+
+enum AccountStatus {
+  ACTIVE
+  SUSPENDED
+  PENDING_KYC
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  PROFIT_ACCRUAL
+  COPY_FEE
+  BONUS
+}
+
+enum TxStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum LedgerEntryType {
+  CREDIT
+  DEBIT
+  HOLD
+  RELEASE
+}
+
+model User {
+  id               String          @id @default(uuid())
+  supabaseUid      String          @unique @map("supabase_uid") // Links 1:1 with auth.users.id
+  email            String          @unique
+  fullName         String?         @map("full_name")
+  phone            String?
+  country          String?
+  role             UserRole        @default(USER)
+  status           AccountStatus   @default(ACTIVE)
+  twoFactorEnabled Boolean         @default(false) @map("two_factor_enabled")
+  createdAt        DateTime        @default(now()) @map("created_at")
+  updatedAt        DateTime        @updatedAt @map("updated_at")
+
+  wallets          Wallet[]
+  transactions     Transaction[]
+  copyTrades       UserCopyTrade[]
+  kycDocument      KycDocument?
+  notifications    Notification[]
+  ledgerEntries    LedgerEntry[]
+
+  @@map("users")
+}
+
+model Wallet {
+  id           String        @id @default(uuid())
+  userId       String        @map("user_id")
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currency     String        // BTC, ETH, USDT, USD, etc.
+  balance      Decimal       @default(0.00000000) @db.Decimal(18, 8)
+  reserved     Decimal       @default(0.00000000) @db.Decimal(18, 8) @map("reserved")
+  lockedProfit Decimal       @default(0.00000000) @db.Decimal(18, 8) @map("locked_profit")
+  totalProfit  Decimal       @default(0.00000000) @db.Decimal(18, 8) @map("total_profit")
+  address      String?       // Dedicated deposit wallet address
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
+
+  ledgerEntries LedgerEntry[]
+
+  @@unique([userId, currency])
+  @@map("wallets")
+}
+
+model Transaction {
+  id                 String          @id @default(uuid())
+  userId             String          @map("user_id")
+  user               User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type               TransactionType
+  currency           String
+  amount             Decimal         @db.Decimal(18, 8)
+  fee                Decimal         @default(0.00000000) @db.Decimal(18, 8)
+  status             TxStatus        @default(PENDING)
+  txHash             String?         @map("tx_hash")
+  paymentProof       String?         @map("payment_proof") // Supabase Storage URL
+  idempotencyKey     String?         @unique @map("idempotency_key")
+  destinationAddress String?         @map("destination_address")
+  notes              String?
+  createdAt          DateTime        @default(now()) @map("created_at")
+  updatedAt          DateTime        @updatedAt @map("updated_at")
+
+  @@map("transactions")
+}
+
+model CopyTrader {
+  id              String          @id @default(uuid())
+  name            String
+  slug            String?         @unique
+  avatar          String?
+  avatarAlt       String?         @map("avatar_alt")
+  tagline         String?
+  summary         String?
+  biography       String?
+  strategy        String?
+  strategyDetails String?         @map("strategy_details")
+  assets          String?
+  experience      String?
+  holdingPeriod   String?         @map("holding_period")
+  winRate         Decimal         @default(0.00) @db.Decimal(5, 2) @map("win_rate") // e.g. 96.40%
+  profitShare     Decimal         @default(15.00) @db.Decimal(5, 2) @map("profit_share")
+  accuracy        Decimal?        @db.Decimal(5, 2)
+  period          String?
+  sampleSize      String?         @map("sample_size")
+  metricSource    String?         @map("metric_source")
+  riskLevel       RiskLevel       @default(MEDIUM) @map("risk_level")
+  riskMethod      String?         @map("risk_method")
+  returns         Decimal?        @db.Decimal(8, 2)
+  drawdown        Decimal?        @db.Decimal(5, 2)
+  rating          Decimal?        @db.Decimal(3, 2)
+  ratingCount     Int             @default(0) @map("rating_count")
+  communitySource String?         @map("community_source")
+  minCapital      Decimal         @default(100.00) @db.Decimal(18, 2) @map("min_capital")
+  currency        String          @default("USDT")
+  fee             Decimal?        @db.Decimal(5, 2)
+  mode            String?
+  eligibility     String?
+  status          String          @default("Draft") // "Draft" | "Published" | "Archived"
+  featured        Boolean         @default(false)
+  featuredOrder   Int?            @map("featured_order")
+  version         Int             @default(1)
+  notes           String?
+  autoTradeMode   Boolean         @default(true) @map("auto_trade_mode")
+  dailyRoiMin     Decimal         @default(1.50) @db.Decimal(5, 2) @map("daily_roi_min")
+  dailyRoiMax     Decimal         @default(4.20) @db.Decimal(5, 2) @map("daily_roi_max")
+  totalFollowers  Int             @default(0) @map("total_followers")
+  isActive        Boolean         @default(true) @map("is_active")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+
+  followers       UserCopyTrade[]
+
+  @@map("copy_traders")
+}
+
+model UserCopyTrade {
+  id           String     @id @default(uuid())
+  userId       String     @map("user_id")
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  traderId     String     @map("trader_id")
+  trader       CopyTrader @relation(fields: [traderId], references: [id], onDelete: Cascade)
+  allocatedUsd Decimal    @db.Decimal(18, 2) @map("allocated_usd")
+  status       String     @default("ACTIVE") // ACTIVE, PAUSED, STOPPED, LIQUIDATED
+  totalEarned  Decimal    @default(0.00000000) @db.Decimal(18, 8) @map("total_earned")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  @@unique([userId, traderId])
+  @@map("user_copy_trades")
+}
+
+model KycDocument {
+  id           String   @id @default(uuid())
+  userId       String   @unique @map("user_id")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  documentType String   @map("document_type") // PASSPORT, DRIVERS_LICENSE, NATIONAL_ID
+  frontUrl     String   @map("front_url")
+  backUrl      String?  @map("back_url")
+  status       TxStatus @default(PENDING)
+  rejectionMsg String?  @map("rejection_msg")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("kyc_documents")
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("notifications")
+}
+
+model SystemSetting {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  value       String
+  description String?
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("system_settings")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  actor     String
+  action    String
+  target    String
+  reason    String?
+  before    Json?
+  after     Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("audit_logs")
+}
+
+model TradingSignal {
+  id          String    @id @default(uuid())
+  title       String
+  asset       String
+  direction   String    // Watch, Buy, Sell
+  timeframe   String    // 1 hour, 4 hours, 1 day, 1 week
+  analysis    String    @db.Text
+  status      String    @default("Draft") // Draft, Published, Withdrawn, Expired
+  enabled     Boolean   @default(false)
+  author      String?
+  version     Int       @default(1)
+  expiresAt   DateTime? @map("expires_at")
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("trading_signals")
+}
+
+model LedgerEntry {
+  id             String          @id @default(uuid())
+  walletId       String          @map("wallet_id")
+  wallet         Wallet          @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  userId         String          @map("user_id")
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactionId  String?         @map("transaction_id")
+  type           LedgerEntryType
+  amount         Decimal         @db.Decimal(18, 8)
+  balanceBefore  Decimal         @map("balance_before") @db.Decimal(18, 8)
+  balanceAfter   Decimal         @map("balance_after") @db.Decimal(18, 8)
+  reservedBefore Decimal         @map("reserved_before") @db.Decimal(18, 8)
+  reservedAfter  Decimal         @map("reserved_after") @db.Decimal(18, 8)
+  currency       String
+  description    String?
+  actor          String?
+  createdAt      DateTime        @default(now()) @map("created_at")
+
+  @@index([userId, currency])
+  @@index([walletId])
+  @@map("ledger_entries")
+}
+

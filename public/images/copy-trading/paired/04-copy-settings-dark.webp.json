@@ -1,0 +1,7 @@
+{
+  "prompt": "Use case: precise-object-edit. Asset type: paired dark dashboard illustration for a public website. Image 1 is the edit target: Copy settings. Produce ONE finished dark-theme counterpart, preserving the exact composition, panel positions, dimensions, aspect ratio, chart paths, numbers, wording and hierarchy of the original. Change EVERY UI panel, screen, card AND the entire surrounding background to a coherent dark theme. Use near-black zinc (#09090b) scene background, charcoal zinc panels (#18181b and #202023), subtle gray borders and white/gray text. There must be NO white or light panel, screen, floating card or light backdrop. Retain original orange chart accents and yellow actions, without new decorative colors. In every branding location remove the words 'Crypto Index Asset', retaining ONLY the original CA. monogram. No new logo design. Match Space Grotesk headings and Geist Mono labels where practical while preserving sizes and layout. Keep the visible 'Concept preview · Demo data' disclaimer. No extra content, no new numbers, no added shapes, no exaggerated glow, no watermark. Output the complete clean illustration at the same aspect ratio, not a collage of alternatives.",
+  "sourceManifest": "output/public-portal-preview/theme-assets/manifest.json",
+  "scene": "04-copy-settings",
+  "theme": "dark",
+  "recordedAt": "2026-09-04"
+}
