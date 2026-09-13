@@ -10,35 +10,8 @@ export async function AdminLivePage() {
   return <AdminScreen />;
 }
 
-/** Secured live state for trader management; no fixture account or finance data crosses into production. */
+/** Live admin screens rely on the unified AdminProvider supplied by AdminLayout. */
 export async function AdminTradersLivePage() {
-  const admin = await requireAdmin();
-  const traders = await getAdminTradersAction();
-  const initial: AdminState = {
-    account: {
-      name: admin.email,
-      email: admin.email,
-      phone: "",
-      jobTitle: "Administrator",
-      density: "compact",
-      reviewAlerts: true,
-      twoFactorDemo: false,
-    },
-    users: [],
-    wallets: [],
-    traders,
-    requests: [],
-    audit: [],
-    credits: [],
-    receipts: {},
-    notifications: [],
-    signals: [],
-    addresses: [],
-  };
-
-  return (
-    <AdminProvider initial={initial} preview={false}>
-      <AdminScreen />
-    </AdminProvider>
-  );
+  await requireAdmin();
+  return <AdminScreen />;
 }
