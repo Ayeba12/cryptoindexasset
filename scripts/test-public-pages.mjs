@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 
 const base = new URL(process.argv[2] ?? "http://127.0.0.1:3100");
-assert.ok(["127.0.0.1", "localhost", "[::1]"].includes(base.hostname), "Run this smoke test against a local server.");
+const isLocal = ["127.0.0.1", "localhost", "[::1]"].includes(base.hostname);
+const isAllowedRemote = base.hostname.endsWith(".vercel.app") || base.hostname.includes("cryptoindexasset.com");
+assert.ok(isLocal || isAllowedRemote, "Run this smoke test against a local server or verified deployment URL.");
 
 const pages = [
   "/",
