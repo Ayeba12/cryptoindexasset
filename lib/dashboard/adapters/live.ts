@@ -160,6 +160,39 @@ export const getLiveSessionAccount = cache(async (): Promise<SessionAccount> => 
       restrictions: restrictionsFor(user.status),
     };
   } catch (error) {
+    if (process.env.SUPABASE_SERVICE_ROLE_KEY && getSupabaseConfig()) {
+      try {
+        const { createClient: createAdminClient } = await import("@supabase/supabase-js");
+        const config = getSupabaseConfig();
+        if (config) {
+          const adminClient = createAdminClient(config.url, process.env.SUPABASE_SERVICE_ROLE_KEY, {
+            auth: { persistSession: false, autoRefreshToken: false },
+          });
+          const { data: row } = await adminClient
+            .from("users")
+            .select("id, email, full_name, status")
+            .eq("supabase_uid", supabaseUser.id)
+            .maybeSingle();
+          if (row) {
+            const status = row.status as AccountStatus;
+            if (status === "SUSPENDED") return { state: "restricted", email: row.email, reason: REASON_SUSPENDED };
+            const displayName = displayNameFor(row.full_name, row.email);
+            return {
+              state: "authenticated",
+              userId: row.id,
+              supabaseUid: supabaseUser.id,
+              email: row.email,
+              displayName,
+              initials: initialsFor(displayName),
+              accountStatus: status,
+              restrictions: restrictionsFor(status),
+            };
+          }
+        }
+      } catch (fallbackErr) {
+        logFailure("account fallback lookup", fallbackErr);
+      }
+    }
     logFailure("account lookup", error);
     return { state: "unprovisioned", email: supabaseUser.email };
   }

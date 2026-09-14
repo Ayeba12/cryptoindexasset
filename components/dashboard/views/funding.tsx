@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowDownLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -294,10 +295,22 @@ export function Deposit({
             </p>
           )}
         </Panel>
-        <Panel title="Recent deposits" bleed>
-          <Region name="Deposits" value={data.activity} retry={retry}>
+        <Panel title="Recent deposits" bleed={data.activity?.status === "ready"}>
+          {data.activity?.status === "empty" ? (
+            <section aria-label="No recent deposits" className="flex items-start gap-4 py-5 sm:py-7">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                <ArrowDownLeft size={20} aria-hidden="true" />
+              </span>
+              <div className="min-w-0 space-y-2">
+                <h3 className="ca-h3">No deposits yet</h3>
+                <p className="ca-body max-w-md text-muted-foreground">
+                  Your deposit requests and their review status will appear here.
+                </p>
+              </div>
+            </section>
+          ) : <Region name="Deposits" value={data.activity} retry={retry}>
             {(rows) => <ActivityTable rows={rows} />}
-          </Region>
+          </Region>}
         </Panel>
       </div>
     </>

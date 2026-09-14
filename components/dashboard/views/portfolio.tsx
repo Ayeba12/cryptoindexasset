@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
+import { History } from "lucide-react";
 import { RegionSkeleton } from "../data-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -406,21 +407,33 @@ export function Overview({
         </div>
         <Panel
           title="Recent activity"
-          bleed
+          bleed={data.activity?.status === "ready"}
           action={
             <ActionLink href="/dashboard/activity">
               View all activity
             </ActionLink>
           }
         >
-          <Region
+          {data.activity?.status === "empty" ? (
+            <section aria-label="No recent activity" className="flex items-start gap-4 py-5 sm:py-7">
+              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                <History size={20} aria-hidden="true" />
+              </span>
+              <div className="min-w-0 space-y-2">
+                <h3 className="ca-h3">No activity yet</h3>
+                <p className="ca-body max-w-md text-muted-foreground">
+                  Your deposits, withdrawals and other account activity will appear here.
+                </p>
+              </div>
+            </section>
+          ) : <Region
             name="Activity"
             value={data.activity}
             variant="table"
             retry={retry}
           >
             {(rows) => <ActivityTable rows={rows} />}
-          </Region>
+          </Region>}
         </Panel>
       </div>
     </>
@@ -454,7 +467,7 @@ export function Assets({
             <Region name="Asset" value={data.asset} retry={retry}>
               {(asset) => (
                 <Panel
-                  title={asset.currency}
+                  title={<CoinIdentity currency={asset.currency}>{asset.name}</CoinIdentity>}
                   action={
                     <div className="flex gap-2">
                       <ActionLink
@@ -571,7 +584,9 @@ export function Assets({
                                 href={`/dashboard/assets/${asset.currency}`}
                                 className="ca-h3 underline underline-offset-4"
                               >
-                                {asset.name}
+                                <CoinIdentity currency={asset.currency}>
+                                  {asset.name}
+                                </CoinIdentity>
                               </DashboardLink>
                               <p className="ca-help">
                                 {asset.enabled
@@ -873,8 +888,20 @@ export function Activity({
                 Reset filters
               </Button>
             </div>
-            <Panel title="Transactions" bleed>
-              <Region
+            <Panel title="Transactions" bleed={data.transactions?.status === "ready"}>
+              {data.transactions?.status === "empty" ? (
+                <section aria-label="No transactions" className="flex items-start gap-4 py-5 sm:py-7">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                    <History size={20} aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0 space-y-2">
+                    <h3 className="ca-h3">No transactions to show</h3>
+                    <p className="ca-body max-w-md text-muted-foreground">
+                      {data.transactions.reason}
+                    </p>
+                  </div>
+                </section>
+              ) : <Region
                 name="Transactions"
                 value={data.transactions}
                 variant="table"
@@ -892,7 +919,7 @@ export function Activity({
                     </div>
                   </>
                 )}
-              </Region>
+              </Region>}
             </Panel>
           </>
         )}
