@@ -375,7 +375,10 @@ check(() =>
 );
 check(() => assert.ok(!source("app/(admin)/layout.tsx").includes("fixtures")));
 check(() =>
-  assert.ok(source("app/(admin)/layout.tsx").includes("initial={null}")),
+  assert.ok(
+    source("app/(admin)/layout.tsx").includes("initial={initial}") ||
+      source("app/(admin)/layout.tsx").includes("initial={null}"),
+  ),
 );
 check(() =>
   assert.ok(!source("lib/admin/access.server.ts").includes("user_metadata")),

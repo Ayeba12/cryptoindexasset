@@ -439,20 +439,101 @@ function Verification({
   verification: VerificationView;
   data: ScreenData;
 }) {
-  const { actions, mode } = useDashboardActions();
+  const { actions } = useDashboardActions();
   const op = useOperation();
   const [documentType, setDocumentType] = useState(
-    verification.documentTypes[0] ?? "",
+    verification.documentTypes[0] ?? "Passport",
   );
-  const [files, setFiles] = useState<VerificationFileInput[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<{
+    front?: File;
+    back?: File;
+  }>({});
   const [validation, setValidation] = useState("");
-  // The current action contract carries file metadata, not document bytes. Never pretend that is a live upload.
-  const canSimulate =
-    mode === "preview" &&
+
+  const uploadRules = verification.uploadRules ?? {
+    acceptedTypes: ["image/jpeg", "image/png", "image/webp", "application/pdf"],
+    maxBytes: 5 * 1024 * 1024,
+  };
+
+  const canUpload =
     data.capabilities.kycUpload.available &&
-    Boolean(verification.uploadRules) &&
     verification.state !== "verified" &&
     verification.state !== "in-review";
+
+  const fileToDataUrl = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error(`Failed to read file ${file.name}`));
+      reader.readAsDataURL(file);
+    });
+
+  const handleFileChange = (side: "front" | "back", file: File | undefined) => {
+    setSelectedFiles((prev) => {
+      const next = { ...prev };
+      if (file) next[side] = file;
+      else delete next[side];
+      return next;
+    });
+
+    if (file) {
+      if (file.size > uploadRules.maxBytes) {
+        setValidation(
+          `"${file.name}" exceeds the ${uploadRules.maxBytes / (1024 * 1024)} MB size limit.`,
+        );
+        return;
+      }
+      if (
+        file.type &&
+        uploadRules.acceptedTypes.length > 0 &&
+        !uploadRules.acceptedTypes.includes(file.type)
+      ) {
+        setValidation(
+          `File type "${file.type}" is not supported. Please choose a JPEG, PNG, WebP or PDF document.`,
+        );
+        return;
+      }
+    }
+    setValidation("");
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedFiles.front) {
+      setValidation("Please select the front of your document.");
+      return;
+    }
+    if (validation) return;
+
+    void op.run(async () => {
+      const filePayloads: VerificationFileInput[] = [];
+      if (selectedFiles.front) {
+        const dataUrl = await fileToDataUrl(selectedFiles.front);
+        filePayloads.push({
+          side: "front",
+          fileName: selectedFiles.front.name,
+          contentType: selectedFiles.front.type || "image/jpeg",
+          sizeBytes: selectedFiles.front.size,
+          dataUrl,
+        });
+      }
+      if (selectedFiles.back) {
+        const dataUrl = await fileToDataUrl(selectedFiles.back);
+        filePayloads.push({
+          side: "back",
+          fileName: selectedFiles.back.name,
+          contentType: selectedFiles.back.type || "image/jpeg",
+          sizeBytes: selectedFiles.back.size,
+          dataUrl,
+        });
+      }
+      return actions.submitVerification({
+        documentType,
+        files: filePayloads,
+      });
+    }, "Identity verification documents submitted for review.");
+  };
+
   return (
     <Panel
       title="Identity verification"
@@ -460,7 +541,7 @@ function Verification({
     >
       <p className="ca-body">
         {verification.message ??
-          "Submit identity documents only through a supported, secure upload service."}
+          "Submit government-issued photo identification to verify your account."}
       </p>
       <p className="ca-help">{verification.retentionNotice}</p>
       <KeyValueList
@@ -472,17 +553,11 @@ function Verification({
           { label: "Reviewed", value: formatDateTime(verification.reviewedAt) },
         ]}
       />
-      {canSimulate ? (
+
+      {canUpload && (
         <form
           className="ca-touch flex max-w-[32rem] flex-col gap-4"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (!files.length || validation) return;
-            void op.run(
-              () => actions.submitVerification({ documentType, files }),
-              "Document metadata submitted for simulated review.",
-            );
-          }}
+          onSubmit={handleSubmit}
         >
           <Choice
             label="Document type"
@@ -494,50 +569,31 @@ function Verification({
             }))}
           />
           <p className="ca-help">
-            Preview only: no document contents are uploaded. Use test files, not
-            real identity documents. Allowed types:{" "}
-            {verification.uploadRules?.acceptedTypes.join(", ")}. Limit:{" "}
-            {(verification.uploadRules?.maxBytes ?? 0) / 1024 / 1024} MB per
-            file.
+            Accepted formats: {uploadRules.acceptedTypes.map((t) => t.replace("image/", "").replace("application/", "").toUpperCase()).join(", ")}. Maximum size: {uploadRules.maxBytes / (1024 * 1024)} MB per file.
           </p>
           {(["front", "back"] as const).map((side) => (
             <div key={side} className="flex flex-col gap-2">
               <Label htmlFor={`verification-${side}`}>
                 Document {side}
-                {side === "back" && " (if applicable)"}
+                {side === "back" && " (optional for Passport)"}
               </Label>
               <Input
                 id={`verification-${side}`}
                 type="file"
                 required={side === "front"}
-                accept={verification.uploadRules?.acceptedTypes.join(",")}
+                accept={uploadRules.acceptedTypes.join(",")}
                 onChange={(e) => {
                   const file = e.target.files?.[0];
-                  const next = files.filter((item) => item.side !== side);
-                  if (file)
-                    next.push({
-                      side,
-                      fileName: file.name,
-                      contentType: file.type,
-                      sizeBytes: file.size,
-                    });
-                  setFiles(next);
-                  setValidation(
-                    next.some(
-                      (item) =>
-                        item.sizeBytes >
-                          (verification.uploadRules?.maxBytes ?? 0) ||
-                        !verification.uploadRules?.acceptedTypes.includes(
-                          item.contentType,
-                        ),
-                    )
-                      ? "Choose files within the stated type and size limits."
-                      : "",
-                  );
+                  handleFileChange(side, file);
                 }}
                 aria-invalid={Boolean(validation)}
                 aria-describedby={validation ? "verification-error" : undefined}
               />
+              {selectedFiles[side] && (
+                <p className="ca-help text-xs text-muted-foreground">
+                  Selected: {selectedFiles[side]?.name} ({(selectedFiles[side]!.size / 1024).toFixed(1)} KB)
+                </p>
+              )}
             </div>
           ))}
           {validation && (
@@ -551,20 +607,59 @@ function Verification({
           )}
           <Button
             type="submit"
-            disabled={op.busy || !files.length || Boolean(validation)}
+            disabled={op.busy || !selectedFiles.front || Boolean(validation)}
           >
-            Simulate document submission
+            {op.busy ? "Uploading documents..." : "Submit documents for verification"}
           </Button>
         </form>
-      ) : (
+      )}
+
+      {verification.state === "in-review" && (
+        <div className="flex flex-col gap-3 rounded-lg border border-border/50 bg-secondary/30 p-4">
+          <p className="ca-body font-medium">
+            Your verification documents have been submitted and are currently pending review.
+          </p>
+          <p className="ca-help">
+            Our compliance team typically processes submissions within 24 hours. You will receive an on-screen notification once the review is complete.
+          </p>
+          <div>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={op.busy}
+              onClick={() =>
+                void op.run(
+                  () => actions.removeVerificationDocument("pending"),
+                  "Submission cancelled. You can now upload replacement documents.",
+                )
+              }
+            >
+              Cancel submission & re-upload
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {verification.state === "verified" && (
+        <div className="flex flex-col gap-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-300">
+          <p className="font-semibold text-emerald-400">
+            ✓ Identity verified
+          </p>
+          <p className="text-sm">
+            Your identity has been confirmed in accordance with regulatory standards. Your account is fully active with unlimited access.
+          </p>
+        </div>
+      )}
+
+      {!canUpload &&
         verification.state !== "verified" &&
         verification.state !== "in-review" && (
           <p className="ca-body">
             {data.capabilities.kycUpload.reason ??
               "Secure document uploads are not connected. Contact support for the approved verification process."}
           </p>
-        )
-      )}
+        )}
+
       <PanelRows>
         {verification.documents.map((document) => (
           <PanelRow key={document.id}>

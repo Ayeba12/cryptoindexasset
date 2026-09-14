@@ -808,12 +808,13 @@ export interface VerificationView {
   retentionNotice: string;
 }
 
-/** Descriptor of one file in a verification submission. The transport (FormData) is the adapter's concern. */
+/** Descriptor of one file in a verification submission. The transport (FormData or base64) is the adapter's concern. */
 export interface VerificationFileInput {
   side: "front" | "back";
   fileName: string;
   contentType: string;
   sizeBytes: number;
+  dataUrl?: string;
 }
 
 /** Verification submission input. */

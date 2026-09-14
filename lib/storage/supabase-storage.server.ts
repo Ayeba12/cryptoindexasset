@@ -182,7 +182,8 @@ export async function uploadKycDocument(
 
     const client = getStorageAdminClient();
     const ext = extensionForMime(mime);
-    const filename = `users/${userId}/${docType.toLowerCase()}_${side}_${Date.now()}.${ext}`;
+    const safeType = docType.toLowerCase().replace(/[^a-z0-9]/g, "_");
+    const filename = `users/${userId}/${safeType}_${side}_${Date.now()}.${ext}`;
 
     if (client) {
       try {

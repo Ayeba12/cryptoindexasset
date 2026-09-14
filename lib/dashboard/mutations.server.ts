@@ -29,6 +29,7 @@ import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db/prisma";
 import { createClient } from "@/lib/supabase/server";
+import { uploadKycDocument } from "@/lib/storage/supabase-storage.server";
 
 import {
   LIVE_REASONS,
@@ -778,22 +779,69 @@ export async function submitVerification(input: VerificationInput): Promise<Acti
       });
     }
 
-    const frontFile = input.files.find((f) => f.side === "front")?.fileName || "Front of document (submitted)";
-    const backFile = input.files.find((f) => f.side === "back")?.fileName || null;
+    const existingKyc = await prisma.kycDocument.findUnique({
+      where: { userId },
+      select: { status: true },
+    });
+    if (existingKyc?.status === "APPROVED") {
+      return actionError<VerificationView>("invalid", "Your account identity is already verified.");
+    }
+
+    const frontInput = input.files.find((f) => f.side === "front");
+    const backInput = input.files.find((f) => f.side === "back");
+
+    if (!frontInput) {
+      return actionError<VerificationView>("invalid", "The front of the document is required.", {
+        fieldErrors: {
+          files: "The front of the document is required",
+        },
+      });
+    }
+
+    let frontStoragePath = frontInput.fileName || "Front of document (submitted)";
+    let backStoragePath = backInput?.fileName || null;
+
+    if (frontInput.dataUrl) {
+      const frontRes = await uploadKycDocument(
+        userId,
+        input.documentType,
+        "front",
+        frontInput.dataUrl,
+        frontInput.contentType || "image/jpeg",
+      );
+      if (!frontRes.success) {
+        return actionError<VerificationView>("invalid", frontRes.error || "Failed to upload front document.");
+      }
+      frontStoragePath = frontRes.storagePath;
+    }
+
+    if (backInput?.dataUrl) {
+      const backRes = await uploadKycDocument(
+        userId,
+        input.documentType,
+        "back",
+        backInput.dataUrl,
+        backInput.contentType || "image/jpeg",
+      );
+      if (!backRes.success) {
+        return actionError<VerificationView>("invalid", backRes.error || "Failed to upload back document.");
+      }
+      backStoragePath = backRes.storagePath;
+    }
 
     const kyc = await prisma.kycDocument.upsert({
       where: { userId },
       create: {
         userId,
         documentType: input.documentType,
-        frontUrl: frontFile,
-        backUrl: backFile,
+        frontUrl: frontStoragePath,
+        backUrl: backStoragePath,
         status: "PENDING",
       },
       update: {
         documentType: input.documentType,
-        frontUrl: frontFile,
-        backUrl: backFile,
+        frontUrl: frontStoragePath,
+        backUrl: backStoragePath,
         status: "PENDING",
         rejectionMsg: null,
       },
@@ -831,6 +879,13 @@ export async function removeVerificationDocument(_id: string): Promise<ActionRes
   return withAccount("verification remove", async ({ userId }) => {
     await prisma.kycDocument.deleteMany({
       where: { userId, status: "PENDING" },
+    });
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        status: "ACTIVE",
+      },
     });
 
     revalidatePath("/dashboard/settings/verification");
