@@ -18,6 +18,7 @@ function editor({ isNew = false, preview = false } = {}) {
     exports, crypto: { randomUUID: () => "preview-id" },
     require(name) {
       if (name === "react/jsx-runtime") return { jsx, jsxs: jsx };
+      if (name === "next/navigation") return { useRouter: () => ({ refresh() {}, push() {} }) };
       if (name === "react") return {
         useState(initial) { const i = cursor++; if (!(i in hooks)) hooks[i] = typeof initial === "function" ? initial() : initial; return [hooks[i], value => { hooks[i] = typeof value === "function" ? value(hooks[i]) : value; }]; },
         useRef(initial) { const i = cursor++; return hooks[i] ??= { current: initial }; },
@@ -25,7 +26,7 @@ function editor({ isNew = false, preview = false } = {}) {
       if (name === "./provider") return { useAdmin: () => ({ state, preview, fault: "none", commit: fn => { state = fn(state); } }) };
       if (name === "@/lib/admin/model") return { blankTrader: () => ({ ...base }), validateTrader: () => ({}), record() {}, CURRENCIES: [] };
       if (name === "@/lib/content/approved-people") return { APPROVED_TRADERS: [] };
-      if (name === "@/lib/admin/traders.server") return Object.fromEntries(["createTraderAction", "updateTraderAction", "publishTraderAction", "unpublishTraderAction", "archiveTraderAction"].map(key => [key, async (...args) => {
+      if (name === "@/lib/admin/traders.server") return Object.fromEntries(["createTraderAction", "updateTraderAction", "publishTraderAction", "unpublishTraderAction", "archiveTraderAction", "deleteTraderAction"].map(key => [key, async (...args) => {
         calls.push({ key, args });
         const input = key === "createTraderAction" ? args[0] : args[1];
         return { success: true, trader: { ...input, id: "saved-id", version: (input?.version ?? 1) + 1 } };

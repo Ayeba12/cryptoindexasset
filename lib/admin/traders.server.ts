@@ -20,16 +20,17 @@ import { uploadTraderPortrait } from "@/lib/storage/supabase-storage.server";
 
 function revalidateTraderPaths(traderId?: string) {
   try {
-    revalidateTag("public-traders", { expire: 0 });
-    revalidatePath("/");
-    revalidatePath("/copy-trading");
-    revalidatePath("/dashboard/traders");
-    revalidatePath("/dashboard/copy-trades");
-    revalidatePath("/dashboard");
-    revalidatePath("/admin/traders");
+    revalidatePath("/", "layout");
+    revalidatePath("/", "page");
+    revalidatePath("/copy-trading", "page");
+    revalidatePath("/dashboard", "layout");
+    revalidatePath("/dashboard/traders", "page");
+    revalidatePath("/dashboard/copy-trades", "page");
+    revalidatePath("/admin", "layout");
+    revalidatePath("/admin/traders", "page");
     if (traderId) {
-      revalidatePath(`/dashboard/traders/${traderId}`);
-      revalidatePath(`/admin/traders/${traderId}`);
+      revalidatePath(`/dashboard/traders/${traderId}`, "page");
+      revalidatePath(`/admin/traders/${traderId}`, "page");
     }
   } catch (err) {
     console.warn("[admin] revalidateTraderPaths warning:", err);
@@ -579,3 +580,62 @@ export async function archiveTraderAction(
     return { success: false, error: err instanceof Error ? err.message : "Archive failed" };
   }
 }
+
+export async function deleteTraderAction(
+  id: string,
+  expectedVersion?: number
+): Promise<{ success: boolean; error?: string }> {
+  const admin = await requireAdmin();
+  const existing = await prisma.copyTrader.findUnique({
+    where: { id },
+    include: {
+      followers: {
+        where: { status: { in: ["ACTIVE", "PAUSED"] } },
+      },
+    },
+  });
+
+  if (!existing) {
+    return { success: false, error: "Trader profile not found." };
+  }
+
+  if (typeof expectedVersion === "number" && existing.version !== expectedVersion) {
+    return {
+      success: false,
+      error: `Conflict: This trader was updated by another administrator. Please reload the page.`,
+    };
+  }
+
+  if (existing.followers.length > 0) {
+    return {
+      success: false,
+      error: `Cannot permanently delete trader "${existing.name}" because there are ${existing.followers.length} active copy positions. Please archive the trader first to auto-liquidate follower capital.`,
+    };
+  }
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      // Delete closed/historical copy-trades to satisfy foreign key
+      await tx.userCopyTrade.deleteMany({ where: { traderId: id } });
+      await tx.copyTrader.delete({ where: { id } });
+
+      await tx.auditLog.create({
+        data: {
+          actor: admin.email,
+          action: "TRADER_DELETE",
+          target: id,
+          reason: `Trader profile "${existing.name}" permanently deleted by administrator.`,
+          before: { id, name: existing.name, status: existing.status },
+          after: Prisma.JsonNull,
+        },
+      });
+    });
+
+    revalidateTraderPaths(id);
+    return { success: true };
+  } catch (err) {
+    console.error("[admin] deleteTraderAction failed:", err);
+    return { success: false, error: err instanceof Error ? err.message : "Deletion failed." };
+  }
+}
+

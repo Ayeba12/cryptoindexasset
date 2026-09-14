@@ -129,6 +129,10 @@ export interface TraderRecord {
   avatar: string | null;
   tagline: string | null;
   summary?: string | null;
+  biography?: string | null;
+  assets?: string | null;
+  experience?: string | null;
+  holdingPeriod?: string | null;
   strategy?: string | null;
   strategyDetails?: string | null;
   profitShare: DecimalLike;
@@ -538,7 +542,7 @@ export function mapTrader(record: TraderRecord): TraderView {
     name: record.name,
     portrait: portraitFrom(record.avatar),
     portraitDisclosure: null,
-    strategy: record.summary?.trim() || record.strategy?.trim() || record.tagline?.trim() || "Strategy not described by the operator",
+    strategy: record.strategy?.trim() || record.summary?.trim() || record.tagline?.trim() || "Strategy not described by the operator",
     accuracy: accVal && record.period && record.metricSource ? { value: accVal, period: record.period, method: record.metricSource, wins: null, losses: null } : { value: null, period: null, method: null, wins: null, losses: null },
     copiers: Number.isFinite(record.totalFollowers) ? record.totalFollowers : null,
     rating: ratingNum !== null && Number.isFinite(ratingNum) && record.communitySource ? { value: ratingNum, reviews: record.ratingCount ?? null } : { value: null, reviews: null },
@@ -559,10 +563,18 @@ export function mapTraderProfile(record: TraderRecord): TraderProfile {
       : mode === "automatic execution" || mode === "exchange-execution" || (!mode && record.autoTradeMode)
         ? "exchange-execution"
         : "unavailable";
+
+  const approachItems = [
+    record.strategyDetails?.trim(),
+    record.experience ? `Experience: ${record.experience.trim()}` : null,
+    record.holdingPeriod ? `Holding period: ${record.holdingPeriod.trim()}` : null,
+    record.assets ? `Markets: ${record.assets.trim()}` : null,
+  ].filter(Boolean) as string[];
+
   return {
     ...mapTrader(record),
-    description: record.strategyDetails?.trim() || record.summary?.trim() || record.tagline?.trim() || "The operator has not described this trader.",
-    approach: [],
+    description: record.biography?.trim() || record.summary?.trim() || record.strategyDetails?.trim() || "The operator has not described this trader.",
+    approach: approachItems,
     history: null,
     activity: null,
     executionMode,

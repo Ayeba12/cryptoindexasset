@@ -196,14 +196,13 @@ export function validateTrader(t: Trader): Record<string, string> {
         "Enter a percentage from 0 to 100, with up to 2 decimal places.";
   if (t.returns && !/^-?\d{1,6}(\.\d{1,2})?$/.test(t.returns))
     errors.returns = "Enter a signed percentage with up to 2 decimal places.";
-  for (const k of [
-    "copiers",
-    "ratingCount",
-    "sampleSize",
-    "experience",
-  ] as const)
-    if (t[k] && !/^\d{1,9}$/.test(t[k]))
+  for (const k of ["copiers", "ratingCount"] as const)
+    if (t[k] && !/^\d{1,9}$/.test(t[k].trim()))
       errors[k] = "Enter a whole number, zero or greater.";
+  if (t.sampleSize && (!/\d+/.test(t.sampleSize) || parseInt(t.sampleSize.match(/\d+/)?.[0] ?? "0", 10) === 0))
+    errors.sampleSize = "Enter a whole number, zero or greater.";
+  if (t.experience && t.experience.length > 100)
+    errors.experience = "Use 100 characters or fewer.";
   if (
     t.rating &&
     (!/^\d(\.\d{1,2})?$/.test(t.rating) || compare(t.rating, "5") > 0)
@@ -222,7 +221,7 @@ export function validateTrader(t: Trader): Record<string, string> {
   )
     errors.metricSource =
       "Provide the period, source and measurement date for these metrics.";
-  if (t.accuracy && (!t.sampleSize || t.sampleSize === "0"))
+  if (t.accuracy && (!t.sampleSize || t.sampleSize.trim() === "0" || !/\d+/.test(t.sampleSize)))
     errors.sampleSize =
       "Provide the number of completed trades used for accuracy.";
   if ((t.copiers || t.rating) && !t.communitySource.trim())

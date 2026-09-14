@@ -16,10 +16,12 @@ import {
   CURRENCIES,
   type Trader,
 } from "@/lib/admin/model";
+import { useRouter } from "next/navigation";
 import {
   createTraderAction,
   updateTraderAction,
   archiveTraderAction,
+  deleteTraderAction,
 } from "@/lib/admin/traders.server";
 import { APPROVED_TRADERS } from "@/lib/content/approved-people";
 import { useAdmin } from "./provider";
@@ -115,8 +117,9 @@ export function TraderList() {
   );
 }
 export function TraderEditor({ id }: { id: string }) {
+  const router = useRouter();
   const { state, commit, fault, preview } = useAdmin();
-  const existing = state!.traders.find((t) => t.id === id);
+  const existing = state!.traders.find((t) => t.id === id || (t as any).slug === id);
   const [draft, setDraft] = useState<Trader>(() =>
     existing ? { ...existing } : blankTrader(),
   );
@@ -124,7 +127,7 @@ export function TraderEditor({ id }: { id: string }) {
   const [message, setMessage] = useState("");
   const [failure, setFailure] = useState("");
   const [confirmation, setConfirmation] = useState<
-    "publish" | "archive" | "draft" | null
+    "publish" | "archive" | "draft" | "delete" | null
   >(null);
   const [isPending, setIsPending] = useState(false);
   const fileSequence = useRef(0);
@@ -215,6 +218,9 @@ export function TraderEditor({ id }: { id: string }) {
       savedId.current = saved.id;
       setDraft(saved);
       setConfirmation(null);
+      try {
+        router.refresh();
+      } catch {}
       if (preview) {
         setMessage("Preview updated in this browser. No live trader was changed.");
       } else if (status === "Archived") {
@@ -230,6 +236,43 @@ export function TraderEditor({ id }: { id: string }) {
       setFailure(
         error instanceof Error ? error.message : "Could not save this profile.",
       );
+    } finally {
+      setIsPending(false);
+    }
+  }
+  async function removePermanently() {
+    if (!savedId.current) return;
+    setIsPending(true);
+    setFailure("");
+    try {
+      const res = preview
+        ? { success: true }
+        : await deleteTraderAction(savedId.current, draft.version ?? 1);
+      if (!res.success) {
+        setFailure(res.error || "Could not delete trader profile.");
+        setConfirmation(null);
+        setIsPending(false);
+        return;
+      }
+      commit((current) => {
+        current.traders = current.traders.filter((t) => t.id !== savedId.current);
+        record(
+          current,
+          "Trader deleted",
+          savedId.current,
+          "Trader profile permanently removed.",
+          new Date().toISOString(),
+        );
+        return current;
+      });
+      setConfirmation(null);
+      setMessage("Trader profile permanently deleted.");
+      try {
+        router.push("/admin/traders");
+        router.refresh();
+      } catch {}
+    } catch (error) {
+      setFailure(error instanceof Error ? error.message : "Could not delete profile.");
     } finally {
       setIsPending(false);
     }
@@ -513,6 +556,16 @@ export function TraderEditor({ id }: { id: string }) {
                 {isPending ? "Archiving..." : "Remove trader"}
               </Button>
             )}
+            {savedId.current && (draft.status === "Archived" || draft.status === "Draft") && (
+              <Button
+                type="button"
+                variant="destructive"
+                disabled={fault === "denied" || isPending}
+                onClick={() => setConfirmation("delete")}
+              >
+                {isPending ? "Deleting..." : "Delete permanently"}
+              </Button>
+            )}
           </div>
           {fault === "denied" && (
             <p className="ca-help">
@@ -527,18 +580,26 @@ export function TraderEditor({ id }: { id: string }) {
           if (!open) setConfirmation(null);
         }}
         title={
-          confirmation === "archive"
-            ? "Archive trader & auto-liquidate allocations?"
-            : confirmation === "draft"
-              ? "Unpublish trader?"
-              : "Publish trader profile?"
+          confirmation === "delete"
+            ? "Permanently delete trader profile?"
+            : confirmation === "archive"
+              ? "Archive trader & auto-liquidate allocations?"
+              : confirmation === "draft"
+                ? "Unpublish trader?"
+                : draft.status === "Published" && existing?.status === "Published"
+                  ? "Save published changes?"
+                  : "Publish trader profile?"
         }
         description={
-          confirmation === "archive"
-            ? "The profile will be archived and hidden from public discovery. All active follower allocations will be immediately liquidated and returned to customer USDT wallets."
-            : confirmation === "draft"
-              ? "The trader will be unpublished and hidden from public and customer directories."
-              : "The profile will become live on the homepage and customer copy-trading directories."
+          confirmation === "delete"
+            ? "The profile will be permanently deleted from the database. This action cannot be undone."
+            : confirmation === "archive"
+              ? "The profile will be archived and hidden from public discovery. All active follower allocations will be immediately liquidated and returned to customer USDT wallets."
+              : confirmation === "draft"
+                ? "The trader will be unpublished and hidden from public and customer directories."
+                : draft.status === "Published" && existing?.status === "Published"
+                  ? "Your updates will be saved and published live across the website and customer dashboard."
+                  : "The profile will become live on the homepage and customer copy-trading directories."
         }
         details={[
           { label: "Trader", value: draft.name || "Unnamed trader" },
@@ -550,25 +611,33 @@ export function TraderEditor({ id }: { id: string }) {
         confirmLabel={
           isPending
             ? "Processing..."
-            : confirmation === "archive"
-              ? "Archive & auto-liquidate"
-              : "Confirm publication"
+            : confirmation === "delete"
+              ? "Delete permanently"
+              : confirmation === "archive"
+                ? "Archive & auto-liquidate"
+                : confirmation === "draft"
+                  ? "Unpublish"
+                  : "Save & publish"
         }
-        destructive={confirmation === "archive"}
+        destructive={confirmation === "archive" || confirmation === "delete"}
         onConfirm={() =>
-          save(
-            confirmation === "archive"
-              ? "Archived"
-              : confirmation === "draft"
-                ? "Draft"
-                : "Published",
-          )
+          confirmation === "delete"
+            ? removePermanently()
+            : save(
+                confirmation === "archive"
+                  ? "Archived"
+                  : confirmation === "draft"
+                    ? "Draft"
+                    : "Published",
+              )
         }
       >
         <p className="ca-help">
-          {confirmation === "archive"
-            ? "Archiving is recorded in audit logs and immediately ceases copying."
-            : "Publication updates the database and invalidates the cached directories."}
+          {confirmation === "delete"
+            ? "Permanent deletion removes this trader profile completely."
+            : confirmation === "archive"
+              ? "Archiving is recorded in audit logs and immediately ceases copying."
+              : "Publication updates the database and invalidates the cached directories."}
         </p>
         {failure && <Notice error>{failure}</Notice>}
       </ConfirmDialog>

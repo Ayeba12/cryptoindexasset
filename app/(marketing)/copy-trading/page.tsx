@@ -2,11 +2,15 @@ import type { Metadata } from "next";
 import { PublicDestination } from "@/components/public-site/frame";
 import { PublicMotion } from "@/components/public-site/motion";
 import { ProductCard } from "@/components/public-site/product-blocks";
+import { TopTradersSection } from "@/components/public-site/community";
+import { getPublicFeaturedTraders } from "@/lib/traders/public";
 
 export const metadata: Metadata = {
   title: "Crypto copy trading explained",
   description: "Understand crypto copy trading, what to look for in trader information, and how fees, risk and execution can affect your results.",
 };
+
+export const revalidate = 60;
 
 const considerations = [
   ["Read the strategy", "Check which assets the trader uses and how the approach works. Ask about anything you cannot explain in your own words."],
@@ -15,7 +19,8 @@ const considerations = [
   ["Know the costs", "Check platform charges, trading costs and any trader commission. Find out when each charge applies."],
 ];
 
-export default function CopyTradingPage() {
+export default async function CopyTradingPage() {
+  const traders = await getPublicFeaturedTraders();
   return <main id="main-content" tabIndex={-1}>
     <PublicMotion>
       <section className="pp-shell pp-guide-hero" aria-labelledby="copy-guide-heading">
@@ -47,8 +52,10 @@ export default function CopyTradingPage() {
           <ProductCard scene="02-trader-discovery" title="Compare more than a number" alt="Concept trader discovery using fictional strategies and demo metrics. No real trader recommendations are shown." performance>Strategies can carry different exposures and costs. A headline return does not make them directly comparable.</ProductCard>
           <ProductCard scene="04-copy-settings" title="Know what you control" alt="Concept allocation settings with demo values. This image is not a working investment form." performance>Understand the allocation, available controls and stopping conditions before you participate.</ProductCard>
         </div>
-        <p className="pp-section-note">Verified trader records are not available on this page. All profiles, balances and performance figures shown above are illustrations.</p>
+        <p className="pp-section-note">Illustrations show sample profiles. Live trader records published by the platform operator are shown below.</p>
       </section>
+
+      <TopTradersSection initialTraders={traders} />
 
       <section className="pp-shell pp-section pp-editorial" id="service-questions" tabIndex={-1} aria-labelledby="service-heading">
         <div data-reveal><h2 className="pp-h2" id="service-heading">Know how your account is handled.</h2><p className="pp-guide-intro">Before you begin, establish how trades start, which decisions you control and how you stop participation.</p></div>
