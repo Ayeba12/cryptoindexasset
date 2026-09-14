@@ -113,6 +113,7 @@ export function RequestQueue({ kind }: { kind: Request["kind"] }) {
         }
 
         setSelectedId(null);
+        window.dispatchEvent(new Event("admin-review-updated"));
         await fetchLive();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to record decision.");

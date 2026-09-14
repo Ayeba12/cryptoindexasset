@@ -41,6 +41,7 @@ import { useAdmin } from "./provider";
 import { AdminAccountMenu } from "./account-menu";
 import "@/components/dashboard/dashboard.css";
 import "./admin.css";
+import { AttentionProvider, AttentionSummary, useAttention } from "./attention";
 
 const icons = [
   SquaresFourIcon,
@@ -67,6 +68,7 @@ export function useAdminRoute() {
   };
 }
 function Navigation({ onNavigate }: { onNavigate: () => void }) {
+  const { counts } = useAttention();
   const { href, path } = useAdminRoute();
   const { state, isMobile, setOpenMobile } = useSidebar();
   const rail = state === "collapsed" && !isMobile;
@@ -113,6 +115,7 @@ function Navigation({ onNavigate }: { onNavigate: () => void }) {
                       (item) => item[0] === slug,
                     );
                     const Icon = icons[index];
+                    const pending = counts?.[slug as keyof typeof counts] ?? 0;
                     const active = slug
                       ? path === slug || path.startsWith(`${slug}/`)
                       : path === "";
@@ -126,7 +129,7 @@ function Navigation({ onNavigate }: { onNavigate: () => void }) {
                         >
                           <Link
                             href={href(slug)}
-                            aria-label={label}
+                            aria-label={`${label}${pending ? `, ${pending} awaiting review` : ""}`}
                             onClick={close}
                             aria-current={active ? "page" : undefined}
                           >
@@ -136,6 +139,7 @@ function Navigation({ onNavigate }: { onNavigate: () => void }) {
                               aria-hidden="true"
                             />
                             <span>{label}</span>
+                            {pending > 0 && <span aria-hidden="true" className={`rounded-full bg-primary px-1.5 py-0.5 text-xs font-semibold text-primary-foreground ${rail ? "absolute right-0 top-0" : "ml-auto"}`}>{pending > 99 ? "99+" : pending}</span>}
                           </Link>
                         </SidebarMenuButton>
                       </SidebarMenuItem>
@@ -154,6 +158,8 @@ function Navigation({ onNavigate }: { onNavigate: () => void }) {
   );
 }
 function Header() {
+  const { counts } = useAttention();
+  const pending = counts ? counts.deposits + counts.withdrawals + counts.verification : 0;
   const { path, href } = useAdminRoute();
   const { preview } = useAdmin();
   const { open, isMobile, openMobile } = useSidebar();
@@ -205,8 +211,9 @@ function Header() {
         />
       </div>
       <Button asChild variant="ghost" size="icon-lg">
-        <Link href={href("notifications")} aria-label="Notifications">
+        <Link href="#admin-attention" className="relative" aria-label={`Needs attention${pending ? `, ${pending} pending reviews` : ""}`}>
           <BellIcon size={20} aria-hidden="true" />
+          {pending > 0 && <span aria-hidden="true" className="absolute -right-1 -top-1 rounded-full bg-primary px-1 text-xs font-semibold text-primary-foreground">{pending > 99 ? "99+" : pending}</span>}
         </Link>
       </Button>
       <Badge variant="outline" className="hidden lg:inline-flex">
@@ -217,6 +224,9 @@ function Header() {
   );
 }
 export function AdminShell({ children }: { children: ReactNode }) {
+  return <AttentionProvider><AdminShellContent>{children}</AdminShellContent></AttentionProvider>;
+}
+function AdminShellContent({ children }: { children: ReactNode }) {
   const { preview, fault, setFault, reset, state } = useAdmin();
   const policy = useRailPolicy();
   const [open, setOpen] = useState(true);
@@ -273,6 +283,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           )}
           <Header />
           <div id="main-content" tabIndex={-1} className="ca-page">
+            <AttentionSummary />
             {children}
           </div>
         </SidebarInset>

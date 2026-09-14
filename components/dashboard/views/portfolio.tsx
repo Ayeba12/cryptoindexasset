@@ -245,7 +245,6 @@ export function Overview({
         }
       />
       <div className="ca-sections">
-        <MarketWatch />
         <Region
           name="Account valuation"
           value={data.valuation}
@@ -306,6 +305,7 @@ export function Overview({
             </>
           )}
         </Region>
+        <MarketWatch />
         <div className="ca-split-8-4">
           <Panel
             title="Account value"
