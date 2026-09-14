@@ -121,7 +121,8 @@ function formatSignedPercentage(val: number | null | undefined): DecimalString {
  */
 async function fetchUpstreamSnapshot(): Promise<MarketSnapshot> {
   const ids = Object.values(COINGECKO_ID_MAP).join(",");
-  const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}&order=market_cap_desc&sparkline=true&price_change_percentage=24h`;
+  const host = process.env.COINGECKO_PRO_API_KEY ? "pro-api.coingecko.com" : "api.coingecko.com";
+  const url = `https://${host}/api/v3/coins/markets?vs_currency=usd&ids=${ids}&order=market_cap_desc&sparkline=true&price_change_percentage=24h`;
 
   const headers: Record<string, string> = {
     Accept: "application/json",
@@ -202,21 +203,7 @@ async function fetchUpstreamSnapshot(): Promise<MarketSnapshot> {
     // Ensure all 6 supported crypto assets are accounted for
     for (const currency of SUPPORTED_CRYPTO) {
       if (!quotes[currency]) {
-        const fallbackPrice = FIXTURE_PRICES[currency] ?? "1.00";
-        quotes[currency] = {
-          currency,
-          price: fallbackPrice,
-          quotedAt: nowIso,
-        };
-        coins.push({
-          currency,
-          name: CURRENCY_META[currency].name,
-          priceUsd: fallbackPrice,
-          change24h: "+0.00",
-          change24hNumber: 0,
-          sparkline: [Number(fallbackPrice), Number(fallbackPrice)],
-          quotedAt: nowIso,
-        });
+        throw new Error(`Market provider omitted ${currency}`);
       }
     }
 

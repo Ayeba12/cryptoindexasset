@@ -218,6 +218,10 @@ export const HistoryChart = dynamic(
   },
 );
 
+const MarketWatch = dynamic(() => import("./market-watch").then((module) => module.MarketWatch), {
+  loading: () => <RegionSkeleton region="Market prices" variant="chart" />,
+});
+
 export function Overview({
   data,
   retry,
@@ -241,6 +245,7 @@ export function Overview({
         }
       />
       <div className="ca-sections">
+        <MarketWatch />
         <Region
           name="Account valuation"
           value={data.valuation}
